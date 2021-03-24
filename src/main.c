@@ -17,15 +17,21 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		case WM_CREATE: {
 				// Menu
 				hMenu = CreateMenu();
+				
+				HMENU hSubMenu = CreatePopupMenu();
+				AppendMenu(hSubMenu, MF_STRING, ID_NEW, "New");
+				AppendMenu(hSubMenu, MF_STRING, ID_EXIT, "Exit");
+				AppendMenu(hMenu, MF_STRING | MF_POPUP, (UINT)hSubMenu, "Game");
+				
 				AppendMenu(hMenu, MF_STRING, ID_PLAY, "Play");
 				AppendMenu(hMenu, MF_STRING, ID_PAUSE, "Pause");
 				AppendMenu(hMenu, MF_STRING, ID_HELP, "Help");
 				SetMenu(hwnd, hMenu);
 				
-				EnableMenuItem(hMenu,1,MF_BYPOSITION|MF_GRAYED);
+				EnableMenuItem(hMenu,2,MF_BYPOSITION|MF_GRAYED);
 				
 				// Icon
-				hIcon = LoadImage(NULL, "icon.ico", IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
+				hIcon = LoadImage(NULL, "resources/icon.ico", IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
 				if(hIcon) {
 					SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
 				}
@@ -63,25 +69,44 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			break;
 		case WM_COMMAND:
             switch(LOWORD(wParam)){
+				// New
+				case ID_NEW:{
+						running = 0;
+						
+						EnableMenuItem(hMenu,2,MF_BYPOSITION|MF_GRAYED);
+						EnableMenuItem(hMenu,1,MF_BYPOSITION|MF_ENABLED);
+						DrawMenuBar(hwnd);
+						
+						game = initiate(TAM);
+			
+						InvalidateRect(hwnd, NULL, TRUE);
+						UpdateWindow(hwnd);
+					}
+					break;
+				// Exit
+                case ID_EXIT:{
+						PostMessage(hwnd, WM_CLOSE, 0, 0);
+					}
+					break;
 				// Play
                 case ID_PLAY:{
 						running = 1;
 						
-						EnableMenuItem(hMenu,0,MF_BYPOSITION|MF_GRAYED);
+						EnableMenuItem(hMenu,1,MF_BYPOSITION|MF_GRAYED);
+						EnableMenuItem(hMenu,2,MF_BYPOSITION|MF_ENABLED);
+						DrawMenuBar(hwnd);
+					}
+					break;
+				// Pause
+				case ID_PAUSE:{
+						running = 0;
+						
+						EnableMenuItem(hMenu,2,MF_BYPOSITION|MF_GRAYED);
 						EnableMenuItem(hMenu,1,MF_BYPOSITION|MF_ENABLED);
 						DrawMenuBar(hwnd);
 					}
 					break;
-				//Pause
-				case ID_PAUSE:{
-						running = 0;
-						
-						EnableMenuItem(hMenu,1,MF_BYPOSITION|MF_GRAYED);
-						EnableMenuItem(hMenu,0,MF_BYPOSITION|MF_ENABLED);
-						DrawMenuBar(hwnd);
-					}
-					break;
-				//Help
+				// Help
 				case ID_HELP:{
 						MessageBox(NULL,
 							"Uses:\n - Play: To start the simulation (steps).\n - Pause: To stop the simulation.\n - Left mouse click: To toggle a cell between 'alive' or 'dead'.\n\n\nCreated by Melmal."
