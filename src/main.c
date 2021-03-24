@@ -18,14 +18,18 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				// Menu
 				hMenu = CreateMenu();
 				
-				HMENU hSubMenu = CreatePopupMenu();
-				AppendMenu(hSubMenu, MF_STRING, ID_NEW, "New");
-				AppendMenu(hSubMenu, MF_STRING, ID_EXIT, "Exit");
-				AppendMenu(hMenu, MF_STRING | MF_POPUP, (UINT)hSubMenu, "Game");
+				HMENU hGameMenu = CreatePopupMenu();
+				AppendMenu(hGameMenu, MF_STRING, ID_NEW, "New");
+				AppendMenu(hGameMenu, MF_STRING, ID_EXIT, "Exit");
+				AppendMenu(hMenu, MF_STRING | MF_POPUP, (UINT)hGameMenu, "Game");
 				
 				AppendMenu(hMenu, MF_STRING, ID_PLAY, "Play");
 				AppendMenu(hMenu, MF_STRING, ID_PAUSE, "Pause");
-				AppendMenu(hMenu, MF_STRING, ID_HELP, "Help");
+				
+				HMENU hHelpMenu = CreatePopupMenu();
+				AppendMenu(hHelpMenu, MF_STRING, ID_HELP, "Quick help");
+				AppendMenu(hHelpMenu, MF_STRING, ID_ABOUT, "About...");
+				AppendMenu(hMenu, MF_STRING | MF_POPUP, (UINT)hHelpMenu, "Help");
 				SetMenu(hwnd, hMenu);
 				
 				EnableMenuItem(hMenu,2,MF_BYPOSITION|MF_GRAYED);
@@ -106,11 +110,18 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 						DrawMenuBar(hwnd);
 					}
 					break;
-				// Help
+				// Quick help
 				case ID_HELP:{
 						MessageBox(NULL,
-							"Uses:\n - Play: To start the simulation (steps).\n - Pause: To stop the simulation.\n - Left mouse click: To toggle a cell between 'alive' or 'dead'.\n\n\nCreated by Melmal."
-							,"Help",MB_OK);
+							"Use:\n\n - Play: To start the simulation (steps).\n\n - Pause: To stop the simulation.\n\n - Left mouse click: To toggle a cell between 'alive' or 'dead'."
+							,"Quick help",MB_OK);
+					}
+					break;
+				// Help
+				case ID_ABOUT:{
+						MessageBox(NULL,
+							"Conway's Game of Life v1.1            (32-bits)\n\n\nUnder the MIT License.\nCopyright (c) 2020 by Melmal"
+							,"About...",MB_OK);
 					}
 					break;
             }
