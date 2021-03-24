@@ -1,5 +1,6 @@
 #include "main.h"
 #include "conwayGame.h"
+#include "fileManager.h"
 
 #include <windows.h>
 #include <time.h>
@@ -20,6 +21,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				
 				HMENU hGameMenu = CreatePopupMenu();
 				AppendMenu(hGameMenu, MF_STRING, ID_NEW, "New");
+				AppendMenu(hGameMenu, MF_STRING, ID_OPEN, "Open");
+				AppendMenu(hGameMenu, MF_STRING, ID_SAVE, "Save");
 				AppendMenu(hGameMenu, MF_STRING, ID_EXIT, "Exit");
 				AppendMenu(hMenu, MF_STRING | MF_POPUP, (UINT)hGameMenu, "Game");
 				
@@ -87,6 +90,78 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 						UpdateWindow(hwnd);
 					}
 					break;
+				// Open
+                case ID_OPEN:{
+						OPENFILENAME ofn;
+						char szFileName[MAX_PATH] = "";
+
+						ZeroMemory(&ofn, sizeof(ofn));
+
+						ofn.lStructSize = sizeof(ofn);
+						ofn.hwndOwner = hwnd;
+						ofn.lpstrFilter = "Conway's Game of Life Files (*.cgof)\0*.cgof\0All Files (*.*)\0*.*\0";
+						ofn.lpstrFile = szFileName;
+						ofn.nMaxFile = MAX_PATH;
+						ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+						ofn.lpstrDefExt = "cgof";
+
+						if(GetOpenFileName(&ofn))
+						{
+							running = 0;
+							
+							EnableMenuItem(hMenu,2,MF_BYPOSITION|MF_GRAYED);
+							EnableMenuItem(hMenu,1,MF_BYPOSITION|MF_ENABLED);
+							DrawMenuBar(hwnd);
+							
+							if(file_to_matrix(szFileName, &game, TAM)) {
+								InvalidateRect(hwnd, NULL, TRUE);
+								UpdateWindow(hwnd);
+							}
+							else {
+								MessageBox(hwnd, "Could not read file", "Error", MB_ICONERROR | MB_OK);
+							}
+						}
+						else {
+							MessageBox(hwnd, "Could not find file", "Error", MB_ICONERROR | MB_OK);
+						}
+					}
+					break;
+				// Save
+                case ID_SAVE:{
+						OPENFILENAME ofn;
+						char szFileName[MAX_PATH] = "";
+
+						ZeroMemory(&ofn, sizeof(ofn));
+
+						ofn.lStructSize = sizeof(ofn);
+						ofn.hwndOwner = hwnd;
+						ofn.lpstrFilter = "Conway's Game of Life Files (*.cgof)\0*.cgof\0All Files (*.*)\0*.*\0";
+						ofn.lpstrFile = szFileName;
+						ofn.nMaxFile = MAX_PATH;
+						ofn.Flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
+						ofn.lpstrDefExt = "cgof";
+
+						if(GetSaveFileName(&ofn))
+						{
+							running = 0;
+							
+							EnableMenuItem(hMenu,2,MF_BYPOSITION|MF_GRAYED);
+							EnableMenuItem(hMenu,1,MF_BYPOSITION|MF_ENABLED);
+							DrawMenuBar(hwnd);
+							
+							if(matrix_to_file(szFileName, game, TAM)) {
+								InvalidateRect(hwnd, NULL, TRUE);
+								UpdateWindow(hwnd);
+							}
+							else {
+								MessageBox(hwnd, "Could not write file", "Error", MB_ICONERROR | MB_OK);
+							}
+						}
+						else {
+							MessageBox(hwnd, "Could not find file", "Error", MB_ICONERROR | MB_OK);
+						}
+					}
+					break;
 				// Exit
                 case ID_EXIT:{
 						PostMessage(hwnd, WM_CLOSE, 0, 0);
@@ -117,7 +192,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 							,"Quick help",MB_OK);
 					}
 					break;
-				// Help
+				// About
 				case ID_ABOUT:{
 						MessageBox(NULL,
 							"Conway's Game of Life v1.1            (32-bits)\n\n\nUnder the MIT License.\nCopyright (c) 2020 by Melmal"

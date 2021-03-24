@@ -6,6 +6,8 @@
 
 #define TAM 60
 #define ID_NEW 3000
+#define ID_OPEN 3001
+#define ID_SAVE 3002
 #define ID_EXIT 3003
 #define ID_PLAY 3004
 #define ID_PAUSE 3005
